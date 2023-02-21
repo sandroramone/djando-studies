@@ -1,10 +1,26 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+from galeria.models import Fotografia
 
 
 def index(request):
-    return render(request, 'galeria/index.html')
+    dados = Fotografia.objects.order_by(
+        "data_fotografia").filter(publicada=True)
+    return render(request, 'galeria/index.html', {"cards": dados})
 
 
-def imagem(request):
-    return render(request, 'galeria/imagem.html')
+def imagem(request, foto_id):
+    foto = get_object_or_404(Fotografia, pk=foto_id)
+    return render(request, 'galeria/imagem.html', {"foto": foto})
+
+
+def buscar(request):
+    dados = Fotografia.objects.order_by(
+        "data_fotografia").filter(publicada=True)
+
+    if "buscar" in request.GET:
+        nome_a_buscar = request.GET["buscar"]
+
+        if nome_a_buscar:
+            dados = dados.filter(nome__icontains=nome_a_buscar)
+
+    return render(request, "galeria/buscar.html", {"cards": dados})
